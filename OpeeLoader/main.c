@@ -38,7 +38,7 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 
 #define kOPFiltersKey CFSTR("OPFilters")
 
-const char *OPLibrariesPath = "/Library/Opee/DynamicLibraries";
+const char *OPLibrariesPath = "/Library/Opee/Extensions";
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
 // same expected functionality of the filtering
