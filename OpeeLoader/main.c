@@ -105,6 +105,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         return;
     
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
+        OPLog(OPLogLevelError, "Unable to access libraries directory");
         return;
     }
     
