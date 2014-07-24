@@ -80,8 +80,8 @@ int main(int argc, const char * argv[]) {
             LOG("No backup for that target exists");
             return OPErrorNoBackup;
         }
-        
-        NSMutableData *binary = [NSMutableData dataWithContentsOfFile:executablePath];
+        NSData *originalData = [NSData dataWithContentsOfFile:executablePath];
+        NSMutableData *binary = originalData.mutableCopy;
         if (!binary)
             return OPErrorRead;
         
@@ -167,7 +167,8 @@ int main(int argc, const char * argv[]) {
             if (task.terminationStatus == 0) {
                 LOG("Successfully resigned executable");
             } else {
-                LOG("Failed to resign executable");
+                LOG("Failed to resign executable. Reverting...");
+                [originalData writeToFile:executablePath atomically:NO];
                 return OPErrorResignFailure;
             }
         }
