@@ -2,20 +2,20 @@
 
 Opee is a platform which enables the ability to load dynamic libraries (dylibs) on Mac OS X into processes and override functionality.
 
-The library must be contained by a bundle and be stored in `/Library/Opee/DynamicLibraries`. They are selected to be loaded into processes based upon a filter which is specified in their Info.plist.
+The library must be contained by a bundle and be stored in `/Library/Opee/Extensions`. They are selected to be loaded into processes based upon a filter which is specified in their Info.plist.
 
 # Installation
 
 Included is the source code for `Opee.framework`, `OpeeLoader.dylib`, and `optool`.
 
-###### Make sure you have Apple's `Command Line Tools` package installed before continuing
+##### Make sure you have Apple's `Command Line Tools` package installed before continuing
 You can find them [here](https://developer.apple.com/downloads/index.action#). Optionally, you can have OS X fetch them for you by running `codesign` in Terminal. If the tools are not installed, you will be prompted.
 
 #### Procedure
 
 1. Copy OpeeLoader.dylib to `/usr/lib`
 2. Copy Opee.framework to `/Library/Frameworks`
-3. Create the folder `/Library/Opee/DynamicLibraries`
+3. Create the folder `/Library/Opee/Extensions`
 4. Copy optool to `/usr/bin` 
 5. optool can be used to install Opee.framework
 6. Run in terminal:
@@ -25,9 +25,9 @@ You can find them [here](https://developer.apple.com/downloads/index.action#). O
 
 ### Notes
 
-Opee modifies the Foundation.framework binary which is very dangerous business. It tries to do its best to stay safe but sometimes there may be hiccups. **If you want or need to uninstall Opee do not remove it**. It first needs to be removed frmo foundation. Instead try one of the following options:
+Opee modifies the Foundation.framework binary which is very tricky business. It tries to do its best to stay safe but sometimes there may be hiccups. **If you want or need to uninstall Opee do not simply remove its dylib**. It first needs to be removed from its hooks in Foundation. Instead, try one of the following options to restore functionality of your system:
 
-1. Opee is disabled in Safe Mode. Try booting with the argument `-x` or by holding down the Shift key and then run the below command.
+1. **Opee is disabled in Safe Mode**. Try booting with the argument `-x` or by holding down the Shift key and then run the below command.
 2. If you are booted, try running in Terminal:
 
 		sudo optool restore -t /System/Library/Frameworks/Foundation.framework
@@ -40,6 +40,26 @@ Opee modifies the Foundation.framework binary which is very dangerous business. 
 		mv (NAME OF BACKUP FOUND) Foundation
 4. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location
 
+# Components
+
+### Opee.framework
+
+This is the framework that extensions can link to in order to use Opee's method swizzling and function hooking APIs. Method swizzling is done using the Objective-C runtime, and the function hooking used was written for MobileSubstrate, which Opee was modeled after.
+
+### OpeeLoader
+
+OpeeLoader is a dyamic library that gets loaded into all processes that link Foundation.framework. It's job is to scan `/Library/Opee/Extensions` and load the extensions based upon their filters.
+
+### optool
+
+`optool` is a command line interface which is used during the installation process of Opee to patch an x86/x86_64 executable. It has 4 main functions:
+
+1. strip – removes the code signature and corresponding load command from a fat/macho binary
+2. install – adds a load dylib command to the path specified. Supports "reexport", "load", "weak", and "upward"
+3. uninstall – removes all load commands to the specified path in the specified binary
+4. restore – puts a backup made by the `install` command back. (The `install` command only makes backups if the `--backup` flag is set)
+
+
 # Usage
 
 Developers can easily make an extension by creating a new `Bundle` project in Xcode. Extensions can hook method and function calls either by their own way or by linking `Opee.framework` which includes functions and macros that are very useful for this purpose.
@@ -47,13 +67,13 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 #### Configuration
 
 1. Link Opee.framework
-2. Set your install name base to /Library/Opee/DynamicLibraries
+2. Set your install name base to /Library/Opee/Extensions
 3. Configure your project to build for both I386 and X86_64 (Xcode nowadays chooses 64-bit by default)
 4. Add filters to your Info.plist in the format specified below
 
-## OPSwizzler
+## Hooking
 
-`OPSwizzler` is the class which can be used to hook C/C++ functions and Objective-C method calls. Its usage is as follows:
+`OPSwizzler` is the class which can be used to hook Objective-C method calls and `OPHooker` is a collection of few C funcions and macros which allow the ability to hook C/C++/Swift functions. Their usage is as follows:
 
 
 	@interface OriginalObject : NSObject
