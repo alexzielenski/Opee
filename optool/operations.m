@@ -195,7 +195,7 @@ BOOL insertLoadEntryIntoBinary(NSString *dylibPath, NSMutableData *binary, struc
     struct dylib_command command;
     struct dylib dylib;
     dylib.name.offset = sizeof(struct dylib_command);
-    dylib.timestamp = 0;
+    dylib.timestamp = 2;
     dylib.current_version = 0;
     dylib.compatibility_version = 0;
     command.cmd = LC_LOAD_UPWARD_DYLIB;
