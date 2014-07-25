@@ -1,3 +1,6 @@
 [submodule "optool/FSArgumentParser"]
 	path = optool/FSArgumentParser
 	url = git@github.com:NSError/ArgumentParser.git
+[submodule "Opee/ZKSwizzle"]
+	path = Opee/ZKSwizzle
+	url = git@github.com:alexzielenski/ZKSwizzle.git

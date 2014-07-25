@@ -17,5 +17,5 @@ FOUNDATION_EXPORT const unsigned char OpeeVersionString[];
 // Creates a function which is executed when the library loads
 #define OPInitialize __attribute__((__constructor__)) static void _OPInitialize()
 
-#import <Opee/OPSwizzler.h>
+#import <Opee/ZKSwizzle.h>
 #import <Opee/OPHooker.h>
