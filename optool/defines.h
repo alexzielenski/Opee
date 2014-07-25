@@ -54,4 +54,5 @@ typedef NS_ENUM(int, OPError) {
     OPErrorInsertFailure      = 9,           // failed to insert load command
     OPErrorInvalidLoadCommand = 10,          // user provided an unnacceptable load command string
     OPErrorResignFailure      = 11,          // codesign failed for some reason
+    OPErrorBackupFailure      = 12,          // failed to write backup
 };
