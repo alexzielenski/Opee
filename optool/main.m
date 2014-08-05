@@ -84,7 +84,7 @@ int main(int argc, const char * argv[]) {
                 if ([manager removeItemAtPath:executablePath error:&error]) {
                     if ([manager moveItemAtPath:backupPath toPath:executablePath error:&error]) {
                         LOG("Successfully restored backup");
-                        return 0;
+                        return OPErrorNone;
                     }
                     LOG("Failed to move backup to correct location");
                     return OPErrorMoveFailure;
