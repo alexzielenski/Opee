@@ -43,6 +43,7 @@ struct thin_header {
 };
 
 typedef NS_ENUM(int, OPError) {
+    OPErrorNone               = 0,
     OPErrorRead               = 1,           // failed to read target path
     OPErrorIncompatibleBinary = 2,           // couldn't find x86 or x86_64 architecture in binary
     OPErrorStripFailure       = 3,           // failed to strip codesignature
@@ -55,4 +56,5 @@ typedef NS_ENUM(int, OPError) {
     OPErrorInvalidLoadCommand = 10,          // user provided an unnacceptable load command string
     OPErrorResignFailure      = 11,          // codesign failed for some reason
     OPErrorBackupFailure      = 12,          // failed to write backup
+    OPErrorInvalidArguments   = 13           // bad arguments
 };
