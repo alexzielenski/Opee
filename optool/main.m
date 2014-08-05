@@ -97,6 +97,7 @@ int main(int argc, const char * argv[]) {
             LOG("No backup for that target exists");
             return OPErrorNoBackup;
         }
+        
         NSData *originalData = [NSData dataWithContentsOfFile:executablePath];
         NSMutableData *binary = originalData.mutableCopy;
         if (!binary)
@@ -110,6 +111,8 @@ int main(int argc, const char * argv[]) {
             LOG("No compatible architecture found");
             return OPErrorIncompatibleBinary;
         }
+
+        // Loop through all of the thin headers we found for each operation
         for (uint32_t i = 0; i < numHeaders; i++) {
             struct thin_header macho = headers[i];
 

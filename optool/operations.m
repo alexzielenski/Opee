@@ -14,7 +14,12 @@ unsigned int OP_SOFT_STRIP = 0x00001337;
 BOOL stripCodeSignatureFromBinary(NSMutableData *binary, struct thin_header macho, BOOL softStrip) {
     binary.currentOffset = macho.offset + macho.size;
     BOOL success = NO;
-    
+
+    // Loop through the commands until we found an LC_CODE_SIGNATURE command
+    // and either replace it and its corresponding signature with zero-bytes
+    // or change LC_CODE_SIGNATURE to OP_SOFT_STRIP, so the compiler
+    // can't interpret the load command for the code signature and treats
+    // the binary as if it doesn't exist
     for (int i = 0; i < macho.header.ncmds; i++) {
         if (binary.currentOffset >= binary.length ||
             binary.currentOffset > macho.header.sizeofcmds + macho.size + macho.offset) // dont go past the header
@@ -47,7 +52,8 @@ BOOL stripCodeSignatureFromBinary(NSMutableData *binary, struct thin_header mach
                 break;
         }
     }
-    
+
+    // paste in a modified header with an updated number and size of load commands
     if (!softStrip) {
         [binary replaceBytesInRange:NSMakeRange(macho.offset, sizeof(macho.header)) withBytes:&macho.header length:sizeof(macho.header)];
     }
@@ -116,7 +122,9 @@ BOOL removeLoadEntryFromBinary(NSMutableData *binary, struct thin_header macho, 
 BOOL binaryHasLoadCommandForDylib(NSMutableData *binary, NSString *dylib, uint32_t *lastOffset, struct thin_header macho) {
     binary.currentOffset = macho.size + macho.offset;
     unsigned int loadOffset = (unsigned int)binary.currentOffset;
-    
+
+    // Loop through compatible LC_LOAD commands until we find one which points
+    // to the given dylib and tell the caller where it is and if it exists
     for (int i = 0; i < macho.header.ncmds; i++) {
         if (binary.currentOffset >= binary.length ||
             binary.currentOffset > macho.offset + macho.size + macho.header.sizeofcmds)
@@ -184,7 +192,11 @@ BOOL insertLoadEntryIntoBinary(NSString *dylibPath, NSMutableData *binary, struc
     // check if data we are replacing is null
     NSData *occupant = [binary subdataWithRange:NSMakeRange(macho.header.sizeofcmds + macho.offset + macho.size,
                                                             length + padding)];
-    
+
+    // All operations in optool try to maintain a constant byte size of the executable
+    // so we don't want to append new bytes to the binary (that would break the executable
+    // since everything is offset-based–we'd have to go in and adjust every offset)
+    // So instead take advantage of the huge amount of padding after the load commands
     if (strcmp([occupant bytes], "\0")) {
         NSLog(@"cannot inject payload into %s because there is no room", dylibPath.fileSystemRepresentation);
         return NO;
@@ -195,7 +207,7 @@ BOOL insertLoadEntryIntoBinary(NSString *dylibPath, NSMutableData *binary, struc
     struct dylib_command command;
     struct dylib dylib;
     dylib.name.offset = sizeof(struct dylib_command);
-    dylib.timestamp = 2;
+    dylib.timestamp = 2; // load commands I've seen use 2 for some reason
     dylib.current_version = 0;
     dylib.compatibility_version = 0;
     command.cmd = LC_LOAD_UPWARD_DYLIB;
@@ -225,6 +237,8 @@ BOOL insertLoadEntryIntoBinary(NSString *dylibPath, NSMutableData *binary, struc
     return YES;
 }
 BOOL removeASLRFromBinary(NSMutableData *binary, struct thin_header macho) {
+    // MH_PIE is a flag on the macho header whcih indicates that the address space of the executable
+    // should be randomized
     if (macho.header.flags & MH_PIE) {
         macho.header.flags &= ~MH_PIE;
         [binary replaceBytesInRange:NSMakeRange(macho.offset, sizeof(macho.header)) withBytes:&macho.header];
