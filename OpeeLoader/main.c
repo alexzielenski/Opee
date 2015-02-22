@@ -137,6 +137,10 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     for (CFIndex i = 0; i < CFArrayGetCount(bundles); i++) {
         CFURLRef bundleURL = CFArrayGetValueAtIndex(bundles, i);
         CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
+        if (bundle == NULL) {
+            return;
+        }
+        
         CFDictionaryRef info = CFBundleGetInfoDictionary(bundle);
         CFDictionaryRef filters = CFDictionaryGetValue(info, kOPFiltersKey);
         
@@ -239,14 +243,11 @@ __attribute__((__constructor__)) static void _OpeeInit(){
             if (!any)
                 shouldLoad = false;
             
-            Class (*NSClassFromString)(CFStringRef) = dlsym(RTLD_DEFAULT, "NSClassFromString");
-            if (NSClassFromString != NULL) {
-                for (CFIndex i = 0; i < CFArrayGetCount(classesFilter); i++) {
-                    CFStringRef class = CFArrayGetValueAtIndex(classesFilter, i);
-                    if (NSClassFromString(class) != NULL) {
-                        shouldLoad = true;
-                        break;
-                    }
+            for (CFIndex i = 0; i < CFArrayGetCount(classesFilter); i++) {
+                CFStringRef class = CFArrayGetValueAtIndex(classesFilter, i);
+                if (objc_getClass(CFStringGetCStringPtr(class, kCFStringEncodingUTF8)) != NULL) {
+                    shouldLoad = true;
+                    break;
                 }
             }
 
