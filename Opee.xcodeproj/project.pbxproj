@@ -13,6 +13,7 @@
 		FA44F22F197F095100435610 /* Opee.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA44F1F6197EFAA100435610 /* Opee.framework */; };
 		FA754CBA19822E84006AA1D9 /* ZKSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = FA754CAF19822E84006AA1D9 /* ZKSwizzle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA754CBB19822E84006AA1D9 /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FA754CB019822E84006AA1D9 /* ZKSwizzle.m */; };
+		FAC892461AC05EB7004B9E82 /* optool in Resources */ = {isa = PBXBuildFile; fileRef = FAC892411AC05E58004B9E82 /* optool */; };
 		FAD89F881A9A714A00BC98C6 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD89F871A9A714A00BC98C6 /* libobjc.dylib */; };
 		FADB09AD197CA0B800D804D0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */; };
 		FADC231219805366008330B7 /* OPHooker.c in Sources */ = {isa = PBXBuildFile; fileRef = FADC231019805366008330B7 /* OPHooker.c */; };
@@ -35,6 +36,20 @@
 			remoteGlobalIDString = FA44F1F5197EFAA100435610;
 			remoteInfo = Opee;
 		};
+		FAC892401AC05E58004B9E82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA0D29691990A2E300EC5F74;
+			remoteInfo = optool;
+		};
+		FAC892421AC05E61004B9E82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = FA0D29681990A2E300EC5F74;
+			remoteInfo = optool;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +63,7 @@
 		FA44F3F0197F6DFF00435610 /* libArgumentParser-Static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libArgumentParser-Static.a"; path = "../../Library/Developer/Xcode/DerivedData/Opee-denajcxzcmhdrygafynvbiowvbxk/Build/Products/Debug/libArgumentParser-Static.a"; sourceTree = "<group>"; };
 		FA754CAF19822E84006AA1D9 /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = ZKSwizzle/ZKSwizzle.h; sourceTree = "<group>"; };
 		FA754CB019822E84006AA1D9 /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = ZKSwizzle/ZKSwizzle.m; sourceTree = "<group>"; };
+		FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = optool.xcodeproj; path = optool/optool.xcodeproj; sourceTree = "<group>"; };
 		FAD89F871A9A714A00BC98C6 /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
 		FADB0990197C8EF300D804D0 /* OpeeLoader.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = OpeeLoader.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -140,6 +156,14 @@
 			path = ZKSwizzle;
 			sourceTree = "<group>";
 		};
+		FAC8923C1AC05E58004B9E82 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAC892411AC05E58004B9E82 /* optool */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FADB0987197C8EF300D804D0 = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +173,7 @@
 				FA44F1F7197EFAA100435610 /* Opee */,
 				FA44F21A197EFB9600435610 /* OpeeLoader */,
 				FA44F22A197F095100435610 /* Opee Tests */,
+				FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */,
 				FADB0991197C8EF300D804D0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -199,6 +224,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				FAC892431AC05E61004B9E82 /* PBXTargetDependency */,
 				FA44F220197EFC2F00435610 /* PBXTargetDependency */,
 			);
 			name = Opee;
@@ -274,6 +300,12 @@
 			mainGroup = FADB0987197C8EF300D804D0;
 			productRefGroup = FADB0991197C8EF300D804D0 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FAC8923C1AC05E58004B9E82 /* Products */;
+					ProjectRef = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FA44F1F5197EFAA100435610 /* Opee */,
@@ -283,11 +315,22 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		FAC892411AC05E58004B9E82 /* optool */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = optool;
+			remoteRef = FAC892401AC05E58004B9E82 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXResourcesBuildPhase section */
 		FA44F1F4197EFAA100435610 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAC892461AC05EB7004B9E82 /* optool in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -355,6 +398,11 @@
 			target = FA44F1F5197EFAA100435610 /* Opee */;
 			targetProxy = FA44F230197F095100435610 /* PBXContainerItemProxy */;
 		};
+		FAC892431AC05E61004B9E82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = optool;
+			targetProxy = FAC892421AC05E61004B9E82 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -365,7 +413,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_LOCATION = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = /Library/Frameworks;
@@ -383,7 +431,7 @@
 				);
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = NO;
+				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
