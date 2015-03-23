@@ -35,6 +35,7 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 #define OPLogLevelError kCFLogLevelError
 
 #define OPLog(TYPE, fmt, ...) CFLog(TYPE, CFSTR("Opee: " fmt), ##__VA_ARGS__)
+//#define OPLog(...) (void)1
 
 #define kOPFiltersKey CFSTR("OPFilters")
 
@@ -152,7 +153,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
 
         CFArrayRef versionFilter = CFDictionaryGetValue(filters, CFSTR("CoreFoundationVersion"));
 
-        if (versionFilter != NULL) {
+        if (versionFilter != NULL && CFGetTypeID(versionFilter) == CFArrayGetTypeID()) {
             shouldLoad = false;
             CFIndex count = CFArrayGetCount(versionFilter);
             if (count > 2) {
@@ -197,7 +198,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
 
         CFArrayRef executableFilter = CFDictionaryGetValue(filters, CFSTR("Executables"));
 
-        if (executableFilter) {
+        if (executableFilter && CFGetTypeID(executableFilter) == CFArrayGetTypeID()) {
             if (!any)
                 shouldLoad = false;
 
@@ -221,7 +222,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
  
         CFArrayRef bundlesFilter = CFDictionaryGetValue(filters, CFSTR("Bundles"));
 
-        if (bundlesFilter != NULL) {
+        if (bundlesFilter != NULL && CFGetTypeID(bundlesFilter) == CFArrayGetTypeID()) {
             if (!any)
                 shouldLoad = false;
 
@@ -239,7 +240,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
 
         CFArrayRef classesFilter = CFDictionaryGetValue(filters, CFSTR("Classes"));
 
-        if (classesFilter != NULL) {
+        if (classesFilter != NULL && CFGetTypeID(classesFilter) == CFArrayGetTypeID()) {
             if (!any)
                 shouldLoad = false;
             
