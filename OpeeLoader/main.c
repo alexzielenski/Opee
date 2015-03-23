@@ -147,7 +147,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         
         bool shouldLoad = false;
 
-        if (filters == NULL) {
+        if (filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) {
             goto release;
         }
 
