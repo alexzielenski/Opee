@@ -73,7 +73,7 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 
 ## Hooking
 
-`OPSwizzler` is the class which can be used to hook Objective-C method calls and `OPHooker` is a collection of few C funcions and macros which allow the ability to hook C/C++/Swift functions. Their usage is as follows:
+`ZKSwizzle` is the class which can be used to hook Objective-C method calls and `OPHooker` is a collection of few C funcions and macros which allow the ability to hook C/C++/Swift functions. Their usage is as follows:
 
 
 	@interface OriginalObject : NSObject
@@ -95,10 +95,10 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 	// it was swizzled to can be access with the SUPER(...) macro
 	@interface ReplacementObject : NSObject
 	// Returns YES
-	+ (BOOL)isSubclassOfClass:(Class)aClass { return (BOOL)ORIG(); }
+	+ (BOOL)isSubclassOfClass:(Class)aClass { return (BOOL)ZKOrig(); }
 	
 	// Returns "original_replaced"
-	- (NSString *)className { return [ORIG() stringByAppendingString:@"_replaced"]; }
+	- (NSString *)className { return [ZKOrig() stringByAppendingString:@"_replaced"]; }
 	
 	// Returns "replaced" when called on the OriginalObject class
 	+ (NSString *)classMethod { return @"replaced"; }
@@ -123,16 +123,16 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 		
 	// This function is executed when the library is loaded
 	OPInitialize {		
-		SWIZZLE(ReplacementObject, OriginalObject);
+		ZKSwizzle(ReplacementObject, OriginalObject);
 		OPHookFunction(NSUserName);
 	}
 	
 Opee also has macros in place for hooking instance variables:
 
 	// gets the value of _myIvar on self
-	int myIvar = OPHookIvar(self, int, "_myIvar");
+	int myIvar = ZKHookIvar(self, int, "_myIvar");
 	// gets the pointer to _myIvar on self so you can reassign it
-	int *myIvar = &OPHookIvar(self, int, "_myIvar");
+	int *myIvar = &ZKHookIvar(self, int, "_myIvar");
 	// set the value of myIvar on the object
 	*myIvar = 3;
 
