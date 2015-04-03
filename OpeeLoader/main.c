@@ -15,7 +15,7 @@
 #include <pwd.h>
 #include <sys/sysctl.h>
 #include <security/mac.h>
-
+#include <syslog.h>
 enum {
     kCFLogLevelEmergency = 0,
     kCFLogLevelAlert = 1,
@@ -30,16 +30,29 @@ enum {
 CF_EXPORT void CFLog(int32_t level, CFStringRef format, ...);
 CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 
-#define OPLogLevelNotice kCFLogLevelNotice
-#define OPLogLevelWarning kCFLogLevelWarning
-#define OPLogLevelError kCFLogLevelError
+#define OPLogLevelNotice LOG_NOTICE
+#define OPLogLevelWarning LOG_WARNING
+#define OPLogLevelError LOG_ERR
 
-#define OPLog(TYPE, fmt, ...) CFLog(TYPE, CFSTR("Opee: " fmt), ##__VA_ARGS__)
-//#define OPLog(...) (void)1
+#ifdef DEBUG
+    #define OPLog(level, format, ...) do { \
+        CFStringRef _formatted = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR(format), ## __VA_ARGS__); \
+        size_t _size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(_formatted), kCFStringEncodingUTF8); \
+        char _utf8[_size + sizeof('\0')]; \
+        CFStringGetCString(_formatted, _utf8, sizeof(_utf8), kCFStringEncodingUTF8); \
+        CFRelease(_formatted); \
+        syslog(level, "Opee: " "%s", _utf8); \
+    } while (false)
+
+//    #define OPLog(TYPE, fmt, ...) CFLog(TYPE, CFSTR("Opee: " fmt), ##__VA_ARGS__)
+#else
+    #define OPLog(...) (void)1
+#endif
 
 #define kOPFiltersKey CFSTR("OPFilters")
 
 const char *OPLibrariesPath = "/Library/Opee/Extensions";
+const char *OPSafePath      = "/.OPSafeMode";
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
 // same expected functionality of the filtering
@@ -50,6 +63,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     // The first argument is the spawned process
     // Get the process name by looking at the last path
     // component.
+    //!TODO: Find out if this leaks
     char argv[MAXPATHLEN];
     unsigned int buffSize = MAXPATHLEN;
     _NSGetExecutablePath(argv, &buffSize);
@@ -59,7 +73,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     
     /* Blacklisted Process Names
      These are blacklisted because they are
-     use internally by the logic below which would
+     used internally by the logic below which would
      result in a crash at boot
      */
 #define BLACKLIST(PROCESS) if (strcmp(executable, #PROCESS) == 0) return;
@@ -80,6 +94,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     BLACKLIST(ReportCrash);
     // Blacklist MDWorker for performance reasons
     BLACKLIST(mdworker);
+    BLACKLIST(mds);
     
     // Don't load in safe mode:
     int safeBoot;
@@ -97,6 +112,7 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         return;
     }
     
+    
     // dont load into root processes
     struct passwd *pw = getpwuid(getuid());
     if (pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0)
@@ -108,7 +124,12 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
         OPLog(OPLogLevelError, "Unable to access libraries directory");
         return;
+    } else if (access(OPSafePath, R_OK) != -1) {
+        // The Safe Mode file exists, don't do anything
+        OPLog(OPLogLevelNotice, "Safe Mode Enabled. Doing nothing.");
+        return;
     }
+    
     
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFStringRef identifier = (mainBundle == NULL) ? NULL : CFBundleGetIdentifier(mainBundle);
