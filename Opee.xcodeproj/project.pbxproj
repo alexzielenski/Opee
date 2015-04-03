@@ -22,12 +22,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		FA44F21F197EFC2F00435610 /* PBXContainerItemProxy */ = {
+		FA0370461ACA157C00D8E531 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FADB0988197C8EF300D804D0 /* Project object */;
+			containerPortal = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FADB098F197C8EF300D804D0;
-			remoteInfo = OpeeLoader;
+			remoteGlobalIDString = FA0D29681990A2E300EC5F74;
+			remoteInfo = optool;
 		};
 		FA44F230197F095100435610 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -41,13 +41,6 @@
 			containerPortal = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = FA0D29691990A2E300EC5F74;
-			remoteInfo = optool;
-		};
-		FAC892421AC05E61004B9E82 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = FA0D29681990A2E300EC5F74;
 			remoteInfo = optool;
 		};
 /* End PBXContainerItemProxy section */
@@ -224,8 +217,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				FAC892431AC05E61004B9E82 /* PBXTargetDependency */,
-				FA44F220197EFC2F00435610 /* PBXTargetDependency */,
+				FA0370471ACA157C00D8E531 /* PBXTargetDependency */,
 			);
 			name = Opee;
 			productName = Opee;
@@ -273,7 +265,7 @@
 		FADB0988197C8EF300D804D0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = "Alex Zielenski";
 				TargetAttributes = {
 					FA44F1F5197EFAA100435610 = {
@@ -346,7 +338,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		FADC231D19805771008330B7 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
@@ -388,20 +380,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		FA44F220197EFC2F00435610 /* PBXTargetDependency */ = {
+		FA0370471ACA157C00D8E531 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = FADB098F197C8EF300D804D0 /* OpeeLoader */;
-			targetProxy = FA44F21F197EFC2F00435610 /* PBXContainerItemProxy */;
+			name = optool;
+			targetProxy = FA0370461ACA157C00D8E531 /* PBXContainerItemProxy */;
 		};
 		FA44F231197F095100435610 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FA44F1F5197EFAA100435610 /* Opee */;
 			targetProxy = FA44F230197F095100435610 /* PBXContainerItemProxy */;
-		};
-		FAC892431AC05E61004B9E82 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = optool;
-			targetProxy = FAC892421AC05E61004B9E82 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -502,7 +489,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -537,7 +523,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				PROVISIONING_PROFILE = "";
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -545,7 +531,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -575,14 +560,16 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				PROVISIONING_PROFILE = "";
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		FADB09A5197C8EF300D804D0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEPLOYMENT_LOCATION = YES;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = /Library/Frameworks/Opee.framework/Libraries;
@@ -598,8 +585,9 @@
 		FADB09A6197C8EF300D804D0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = "";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = /Library/Frameworks/Opee.framework/Libraries;
