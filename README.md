@@ -17,7 +17,7 @@ You can find them [here](https://developer.apple.com/downloads/index.action#). O
 2. Copy Opee.framework to `/Library/Frameworks`
 3. Create the folder `/Library/Opee/Extensions`
 4. Copy optool to `/usr/bin` 
-5. optool can be used to install Opee.framework
+5. optool can be used to install OpeeLoader:
 6. Run in terminal:
 
 		sudo optool install --backup --resign --command upward -t /System/Library/Frameworks/Foundation.framework -p /usr/lib/OpeeLoader.dylib
@@ -38,7 +38,8 @@ Opee modifies the Foundation.framework binary which is very tricky business. It 
 		ls
 		mv Foundation Foundation_evil
 		mv (NAME OF BACKUP FOUND) Foundation
-4. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location
+4. Boot into single user mode by holding CMD+S during boot, or use the terminal found in the Recovery partition to create the file `.OPSafeMode` in the root directory of your partition. (Dont forget the dot in `.OPSafeMode`!)
+5. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location, or restore Foundation.framework
 
 # Components
 
