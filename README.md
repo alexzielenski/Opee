@@ -36,7 +36,7 @@ Opee modifies the Foundation.framework binary which is very tricky business. It 
 		cd /System/Library/Frameworks/Foundation.framework/Versions/C
 		// Find the location of the Opee backup with ls
 		ls
-		rm Foundation
+		mv Foundation Foundation_evil
 		mv (NAME OF BACKUP FOUND) Foundation
 4. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location
 
