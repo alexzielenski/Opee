@@ -8,13 +8,18 @@
 
 #include "OPHooker.h"
 void MSHookFunction(void *symbol, void *replace, void **result);
-void *MSFindSymbol(void *image, const char *name);
+void *MSFindSymbol(const void *image, const char *name);
+void *MSGetImageByName(const char *file);
 
 int OPHookFunctionPtr(void *symbol, void *replace, void **result) {
     MSHookFunction(symbol, replace, result);
     return 0;
 }
 
-void *OPFindSymbol(const char *name) {
-    return MSFindSymbol(NULL, name);
+void *OPGetImageByName(const char *file) {
+    return MSGetImageByName(file);
+}
+
+void *OPFindSymbol(const void *image, const char *name) {
+    return MSFindSymbol(image, name);
 }
