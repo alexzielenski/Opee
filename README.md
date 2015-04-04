@@ -17,7 +17,7 @@ You can find them [here](https://developer.apple.com/downloads/index.action#). O
 2. Copy Opee.framework to `/Library/Frameworks`
 3. Create the folder `/Library/Opee/Extensions`
 4. Copy optool to `/usr/bin` 
-5. optool can be used to install Opee.framework
+5. optool can be used to install OpeeLoader:
 6. Run in terminal:
 
 		sudo optool install --backup --resign --command upward -t /System/Library/Frameworks/Foundation.framework -p /usr/lib/OpeeLoader.dylib
@@ -36,9 +36,10 @@ Opee modifies the Foundation.framework binary which is very tricky business. It 
 		cd /System/Library/Frameworks/Foundation.framework/Versions/C
 		// Find the location of the Opee backup with ls
 		ls
-		rm Foundation
+		mv Foundation Foundation_evil
 		mv (NAME OF BACKUP FOUND) Foundation
-4. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location
+4. Boot into single user mode by holding CMD+S during boot, or use the terminal found in the Recovery partition to create the file `.OPSafeMode` in the root directory of your partition. (Dont forget the dot in `.OPSafeMode`!)
+5. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location, or restore Foundation.framework
 
 # Components
 
@@ -73,7 +74,7 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 
 ## Hooking
 
-`OPSwizzler` is the class which can be used to hook Objective-C method calls and `OPHooker` is a collection of few C funcions and macros which allow the ability to hook C/C++/Swift functions. Their usage is as follows:
+`ZKSwizzle` is the class which can be used to hook Objective-C method calls and `OPHooker` is a collection of few C funcions and macros which allow the ability to hook C/C++/Swift functions. Their usage is as follows:
 
 
 	@interface OriginalObject : NSObject
@@ -95,10 +96,10 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 	// it was swizzled to can be access with the SUPER(...) macro
 	@interface ReplacementObject : NSObject
 	// Returns YES
-	+ (BOOL)isSubclassOfClass:(Class)aClass { return (BOOL)ORIG(); }
+	+ (BOOL)isSubclassOfClass:(Class)aClass { return (BOOL)ZKOrig(); }
 	
 	// Returns "original_replaced"
-	- (NSString *)className { return [ORIG() stringByAppendingString:@"_replaced"]; }
+	- (NSString *)className { return [ZKOrig() stringByAppendingString:@"_replaced"]; }
 	
 	// Returns "replaced" when called on the OriginalObject class
 	+ (NSString *)classMethod { return @"replaced"; }
@@ -123,16 +124,16 @@ Developers can easily make an extension by creating a new `Bundle` project in Xc
 		
 	// This function is executed when the library is loaded
 	OPInitialize {		
-		SWIZZLE(ReplacementObject, OriginalObject);
+		ZKSwizzle(ReplacementObject, OriginalObject);
 		OPHookFunction(NSUserName);
 	}
 	
 Opee also has macros in place for hooking instance variables:
 
 	// gets the value of _myIvar on self
-	int myIvar = OPHookIvar(self, int, "_myIvar");
+	int myIvar = ZKHookIvar(self, int, "_myIvar");
 	// gets the pointer to _myIvar on self so you can reassign it
-	int *myIvar = &OPHookIvar(self, int, "_myIvar");
+	int *myIvar = &ZKHookIvar(self, int, "_myIvar");
 	// set the value of myIvar on the object
 	*myIvar = 3;
 
