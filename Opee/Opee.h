@@ -15,7 +15,9 @@ FOUNDATION_EXPORT double OpeeVersionNumber;
 FOUNDATION_EXPORT const unsigned char OpeeVersionString[];
 
 // Creates a function which is executed when the library loads
-#define OPInitialize __attribute__((__constructor__)) static void _OPInitialize()
+#define _OPNAME(NAME, LINE) _OPNAME2(NAME, LINE) // Preprocess hax to get the line to concat
+#define _OPNAME2(NAME, LINE) NAME ## LINE
+#define OPInitialize __attribute__((__constructor__)) static void _OPNAME(_OPInitialize, __LINE__) ()
 
 #import <Opee/ZKSwizzle.h>
 #import <Opee/OPHooker.h>
