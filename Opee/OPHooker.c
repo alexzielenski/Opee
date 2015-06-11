@@ -7,9 +7,20 @@
 //
 
 #include "OPHooker.h"
-void MSHookFunction(void *symbol, void *replace, void **result);
-void *MSFindSymbol(const void *image, const char *name);
-void *MSGetImageByName(const char *file);
+
+typedef void *MSImageRef;
+
+MSImageRef MSGetImageByName(const char *file)
+__asm__("SubGetImageByName");
+void *MSFindSymbol(MSImageRef image, const char *name)
+__asm__("SubFindSymbol");
+
+void MSHookFunction(void *symbol, void *replace, void **result)
+__asm__("SubHookFunction");
+
+//void MSHookFunction(void *symbol, void *replace, void **result);
+//void *MSFindSymbol(const void *image, const char *name);
+//void *MSGetImageByName(const char *file);
 
 int OPHookFunctionPtr(void *symbol, void *replace, void **result) {
     MSHookFunction(symbol, replace, result);
@@ -21,5 +32,5 @@ void *OPGetImageByName(const char *file) {
 }
 
 void *OPFindSymbol(const void *image, const char *name) {
-    return MSFindSymbol(image, name);
+    return MSFindSymbol((MSImageRef)image, name);
 }

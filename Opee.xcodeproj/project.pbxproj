@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA2B90581B29472E00116387 /* SubstituteHooker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2B90571B29472E00116387 /* SubstituteHooker.a */; };
 		FA44F212197EFAE000435610 /* Opee.h in Headers */ = {isa = PBXBuildFile; fileRef = FA44F211197EFAE000435610 /* Opee.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA44F21C197EFB9600435610 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = FA44F21B197EFB9600435610 /* main.c */; };
 		FA44F22E197F095100435610 /* Opee_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA44F22D197F095100435610 /* Opee_Tests.m */; };
@@ -18,7 +19,6 @@
 		FADB09AD197CA0B800D804D0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */; };
 		FADC231219805366008330B7 /* OPHooker.c in Sources */ = {isa = PBXBuildFile; fileRef = FADC231019805366008330B7 /* OPHooker.c */; };
 		FADC231319805366008330B7 /* OPHooker.h in Headers */ = {isa = PBXBuildFile; fileRef = FADC231119805366008330B7 /* OPHooker.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FADC23C219809016008330B7 /* SubstrateHooker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FADC23C119809016008330B7 /* SubstrateHooker.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +46,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA2B90571B29472E00116387 /* SubstituteHooker.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = SubstituteHooker.a; path = Hookers/SubstituteHooker.a; sourceTree = "<group>"; };
 		FA44F1F6197EFAA100435610 /* Opee.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Opee.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA44F211197EFAE000435610 /* Opee.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Opee.h; sourceTree = "<group>"; };
 		FA44F217197EFAF500435610 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -62,7 +63,6 @@
 		FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		FADC231019805366008330B7 /* OPHooker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OPHooker.c; sourceTree = "<group>"; };
 		FADC231119805366008330B7 /* OPHooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPHooker.h; sourceTree = "<group>"; };
-		FADC23C119809016008330B7 /* SubstrateHooker.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = SubstrateHooker.a; path = SubstrateHooker/SubstrateHooker.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FADC23C219809016008330B7 /* SubstrateHooker.a in Frameworks */,
+				FA2B90581B29472E00116387 /* SubstituteHooker.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,7 +100,7 @@
 				FA44F211197EFAE000435610 /* Opee.h */,
 				FADC231119805366008330B7 /* OPHooker.h */,
 				FADC231019805366008330B7 /* OPHooker.c */,
-				FADC23C119809016008330B7 /* SubstrateHooker.a */,
+				FA2B90571B29472E00116387 /* SubstituteHooker.a */,
 				FA754CAA19822E84006AA1D9 /* ZKSwizzle */,
 				FA44F219197EFAF700435610 /* Supporting Files */,
 			);
@@ -414,7 +414,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Opee/SubstrateHooker",
+					"$(PROJECT_DIR)/Opee/Hookers",
+					"/Users/Alex/Downloads/substitute-master-2/out",
 				);
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -442,7 +443,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Opee/SubstrateHooker",
+					"$(PROJECT_DIR)/Opee/Hookers",
+					"/Users/Alex/Downloads/substitute-master-2/out",
 				);
 				OTHER_LDFLAGS = "-lstdc++";
 				PRODUCT_NAME = "$(TARGET_NAME)";
