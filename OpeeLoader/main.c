@@ -53,6 +53,7 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 
 const char *OPLibrariesPath = "/Library/Opee/Extensions";
 const char *OPSafePath      = "/.OPSafeMode";
+const char *OPSafePath2     = "/Library/Opee/Extensions/.OPSafeMode";
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
 // same expected functionality of the filtering
@@ -124,7 +125,8 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
         OPLog(OPLogLevelError, "Unable to access libraries directory");
         return;
-    } else if (access(OPSafePath, R_OK) != -1) {
+    } else if (access(OPSafePath, R_OK) != -1 ||
+               access(OPSafePath2, R_OK) != -1) {
         // The Safe Mode file exists, don't do anything
         OPLog(OPLogLevelNotice, "Safe Mode Enabled. Doing nothing.");
         return;
@@ -164,6 +166,10 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         }
         
         CFDictionaryRef info = CFBundleGetInfoDictionary(bundle);
+        if (info == NULL || CFGetTypeID(info) != CFDictionaryGetTypeID()) {
+            goto release;
+        }
+        
         CFDictionaryRef filters = CFDictionaryGetValue(info, kOPFiltersKey);
         
         bool shouldLoad = false;
