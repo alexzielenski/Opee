@@ -49,8 +49,8 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
     #define OPLog(...) (void)1
 #endif
 
-#define kOPFiltersKey CFSTR("OPFilters")
-
+//#define kOPFiltersKey CFSTR("OPFilters")
+static const CFStringRef kOPFiltersKey = CFSTR("OPFilters");
 const char *OPLibrariesPath = "/Library/Opee/Extensions";
 const char *OPSafePath      = "/.OPSafeMode";
 const char *OPSafePath2     = "/Library/Opee/Extensions/.OPSafeMode";
