@@ -4,6 +4,8 @@ Opee is a platform which enables the ability to load dynamic libraries (dylibs) 
 
 The library must be contained by a bundle and be stored in `/Library/Opee/Extensions`. They are selected to be loaded into processes based upon a filter which is specified in their Info.plist.
 
+I am not responsible for how much this screws up your system.
+
 # Installation
 
 Included is the source code for `Opee.framework`, `OpeeLoader.dylib`, and `optool`.
@@ -12,6 +14,13 @@ Included is the source code for `Opee.framework`, `OpeeLoader.dylib`, and `optoo
 You can find them [here](https://developer.apple.com/downloads/index.action#). Optionally, you can have OS X fetch them for you by running `codesign` in Terminal. If the tools are not installed, you will be prompted.
 
 #### Procedure
+
+***Note*** If you are using El Capitan, you must run these commands before starting installation:
+
+```
+sudo nvram boot-args="rootless=0"
+sudo reboot
+```
 
 1. Copy OpeeLoader.dylib to `/usr/lib`
 2. Copy Opee.framework to `/Library/Frameworks`
