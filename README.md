@@ -21,6 +21,7 @@ You can find them [here](https://developer.apple.com/downloads/index.action#). O
 sudo nvram boot-args="rootless=0"
 sudo reboot
 ```
+You can re-enable rootless after installating by replacing the `0` with a `1`.
 
 1. Copy OpeeLoader.dylib to `/usr/lib`
 2. Copy Opee.framework to `/Library/Frameworks`
