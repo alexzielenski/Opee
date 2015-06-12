@@ -113,7 +113,6 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         return;
     }
     
-    
     // dont load into root processes
     struct passwd *pw = getpwuid(getuid());
     if (pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0)
