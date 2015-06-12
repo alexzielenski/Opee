@@ -54,7 +54,7 @@ static const CFStringRef kOPFiltersKey    = CFSTR("OPFilters");
 static const CFStringRef kSIMBLFiltersKey = CFSTR("SIMBLTargetApplications");
 const char *OPLibrariesPath = "/Library/Opee/Extensions";
 const char *OPSafePath      = "/.OPSafeMode";
-const char *OPSafePath2     = "/Library/Opee/Extensions/.OPSafeMode";
+const char *OPSafePath2     = "/Library/Opee/.OPSafeMode";
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
 // same expected functionality of the filtering
@@ -65,7 +65,6 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     // The first argument is the spawned process
     // Get the process name by looking at the last path
     // component.
-    //!TODO: Find out if this leaks
     char argv[MAXPATHLEN];
     unsigned int buffSize = MAXPATHLEN;
     _NSGetExecutablePath(argv, &buffSize);
