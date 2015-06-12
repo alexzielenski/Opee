@@ -577,6 +577,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1.2;
 				DYLIB_INSTALL_NAME_BASE = /Library/Frameworks/Opee.framework/Libraries;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -595,6 +596,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1.2;
 				DYLIB_INSTALL_NAME_BASE = /Library/Frameworks/Opee.framework/Libraries;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
