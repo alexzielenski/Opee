@@ -48,7 +48,7 @@ Opee modifies the Foundation.framework binary which is very tricky business. It 
 		ls
 		mv Foundation Foundation_evil
 		mv (NAME OF BACKUP FOUND) Foundation
-4. Boot into single user mode by holding CMD+S during boot, or use the terminal found in the Recovery partition to create the file `.OPSafeMode` in the root directory of your partition. (Dont forget the dot in `.OPSafeMode`!)
+4. Boot into single user mode by holding CMD+S during boot, or use the terminal found in the Recovery partition to create the file `.OPSafeMode` in the root directory of your partition. (Dont forget the dot in `.OPSafeMode`!). Optionally, you make also place `.OPSafeMode` in `/Library/Opee/.OPSafeMode`
 5. Otherwise, another solution is to boot into another OS and move the backup made by Opee to its original location, or restore Foundation.framework
 
 # Components
@@ -149,7 +149,7 @@ Opee also has macros in place for hooking instance variables:
 
 ## Filters
 
-In your Bundle's Info.plist, you must supply loading filters which go in a dictionary of key `OPFilters`
+In your Bundle's Info.plist, you must supply loading filters which go in a dictionary of key `OPFilters` these filters affect which processes will load your library. They are made to be compatible with MobileSubstrate filters for familiarity.
 
 | Key                   | Type   | Value                                                                                                     |
 |-----------------------|--------|-----------------------------------------------------------------------------------------------------------|
