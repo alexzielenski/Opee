@@ -50,7 +50,8 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 #endif
 
 //#define kOPFiltersKey CFSTR("OPFilters")
-static const CFStringRef kOPFiltersKey = CFSTR("OPFilters");
+static const CFStringRef kOPFiltersKey    = CFSTR("OPFilters");
+static const CFStringRef kSIMBLFiltersKey = CFSTR("SIMBLTargetApplications");
 const char *OPLibrariesPath = "/Library/Opee/Extensions";
 const char *OPSafePath      = "/.OPSafeMode";
 const char *OPSafePath2     = "/Library/Opee/Extensions/.OPSafeMode";
@@ -172,9 +173,83 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         
         CFDictionaryRef filters = CFDictionaryGetValue(info, kOPFiltersKey);
         
+        
         bool shouldLoad = false;
 
         if (filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) {
+            // Try SIMBL?
+            /*
+             <key>SIMBLTargetApplications</key>
+             <array>
+             <dict>
+             <key>BundleIdentifier</key>
+             <string>com.apple.Safari</string>
+             <key>MinBundleVersion</key>
+             <integer>125</integer>
+             <key>MaxBundleVersion</key>
+             <integer>125</integer>
+             </dict>
+             </array>
+             */
+            
+            CFArrayRef simblFilters = CFDictionaryGetValue(info, kSIMBLFiltersKey);
+            if (simblFilters == NULL || CFGetTypeID(simblFilters) != CFArrayGetTypeID()) {
+                goto release;
+            }
+            
+            // we have some SIMBL filters
+            CFIndex count = CFArrayGetCount(simblFilters);
+            for (CFIndex i = 0; i < count && shouldLoad == false; i++) {
+                CFDictionaryRef entry = CFArrayGetValueAtIndex(simblFilters, i);
+                // only support dictionaries
+                if (CFGetTypeID(entry) != CFDictionaryGetTypeID())
+                    continue;
+                
+                CFStringRef bundleIdentifier = CFDictionaryGetValue(entry, CFSTR("BundleIdentifier"));
+                if (bundleIdentifier == NULL || CFGetTypeID(bundleIdentifier) != CFStringGetTypeID())
+                    continue;
+                
+                CFBundleRef bundle = NULL;
+                if (CFEqual(bundleIdentifier, CFSTR("*"))) {
+                    shouldLoad = true;
+                    
+                } else if ((bundle = CFBundleGetBundleWithIdentifier(bundleIdentifier)) != NULL) {
+                    // we have a hit with the bundle identifier, check versions
+                    // check min and max bundle versions
+                    SInt32 targetVersion = CFBundleGetVersionNumber(bundle);
+                    CFTypeRef minVersionObject = CFDictionaryGetValue(entry, CFSTR("MinBundleVersion"));
+                    CFTypeRef maxVersionObject = CFDictionaryGetValue(entry, CFSTR("MaxBundleVersion"));
+                    
+                    // get the number out of whatever type it is in
+                    SInt32 minVersion = 0;
+                    if (minVersionObject != NULL) {
+                        if (CFGetTypeID(minVersionObject) == CFNumberGetTypeID()) {
+                            CFNumberGetValue(minVersionObject, kCFNumberSInt32Type, &minVersion);
+                        } else if (CFGetTypeID(minVersionObject) == CFStringGetTypeID()) {
+                            minVersion = CFStringGetIntValue(minVersionObject);
+                        } else {
+                            // Unrecognized version syntax
+                            continue;
+                        }
+                    }
+                    
+                    SInt32 maxVersion = 0;
+                    if (maxVersionObject != NULL) {
+                        if (CFGetTypeID(maxVersionObject) == CFNumberGetTypeID()) {
+                            CFNumberGetValue(maxVersionObject, kCFNumberSInt32Type, &maxVersion);
+                        } else if (CFGetTypeID(maxVersionObject) == CFStringGetTypeID()) {
+                            maxVersion = CFStringGetIntValue(maxVersionObject);
+                        } else {
+                            // Unrecognized version syntax
+                            continue;
+                        }
+                    }
+                    
+                    // load if NOT (version exists and out of bounds)
+                    shouldLoad = !((maxVersion && maxVersion < targetVersion) || (minVersion && minVersion > targetVersion));
+                }
+            }
+            
             goto release;
         }
 
