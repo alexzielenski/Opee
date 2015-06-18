@@ -79,26 +79,10 @@ static const CFStringRef kOPExecutablesKey           = CFSTR("Executables");
 static const CFStringRef kOPBundlesKey               = CFSTR("Bundles");
 static const CFStringRef kOPClassesKey               = CFSTR("Classes");
 
-
-static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, char *executable) {
-    if (libraries == NULL)
-        return;
-    
-    CFDictionaryRef info = CFBundleGetInfoDictionary(mainBundle);
-    CFStringRef identifier = (info == NULL) ? NULL : CFDictionaryGetValue(info, kCFBundleIdentifierKey);
-    OPLog(OPLogLevelNotice, "Installing %@ [%s] (%.2f)", identifier, executable, kCFCoreFoundationVersionNumber);
-    
-    CFBundleRef folder = CFBundleCreate(kCFAllocatorDefault, libraries);
-    
-    if (folder == NULL)
-        return;
-    
-    CFArrayRef bundles = CFBundleCopyResourceURLsOfType(folder, CFSTR("bundle"), NULL);
-    CFRelease(folder);
-    
-    if (bundles == NULL) {
-        return;
-    }
+static BOOL _OpeeIsProcessBlacklistedInFolder(CFURLRef libraries, CFDictionaryRef info, CFStringRef executableName) {
+    CFStringRef identifier;
+    if (info != NULL)
+        identifier = CFDictionaryGetValue(info, kCFBundleIdentifierKey);
     
     bool blacklisted = false;
     
@@ -116,7 +100,7 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, c
                                                                kOPConfigFileName,
                                                                false);
     if (configURL == NULL)
-        goto parse;
+        return NO;
     
     CFReadStreamRef configStream = CFReadStreamCreateWithFile(kCFAllocatorDefault, configURL);
     CFRelease(configURL);
@@ -124,7 +108,7 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, c
     if (configStream != NULL) {
         if (!CFReadStreamOpen(configStream)) {
             CFRelease(configStream);
-            goto parse;
+            return NO;
         }
         
         CFDictionaryRef config = CFPropertyListCreateWithStream(kCFAllocatorDefault,
@@ -139,7 +123,7 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, c
         if (config == NULL) {
             // Couldn't read or parse the config...
             OPLog(OPLogLevelNotice, "Failed to parse blacklist. Invalid format?");
-            goto parse;
+            return NO;
         }
         
         if (CFGetTypeID(config) == CFDictionaryGetTypeID()) {
@@ -149,36 +133,49 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, c
             if (CFGetTypeID(blacklist) == CFArrayGetTypeID() &&
                 CFGetTypeID(whitelist) == CFArrayGetTypeID()) {
                 
-                CFStringRef executableName = CFStringCreateWithCString(kCFAllocatorDefault,
-                                                                       executable,
-                                                                       kCFStringEncodingUTF8);
-                
-                if (executableName != NULL) {
-                    if (!blacklisted &&
-                        ((identifier != NULL && CFArrayContainsValue(blacklist, CFRangeMake(0, CFArrayGetCount(blacklist)), identifier)) ||
-                         CFArrayContainsValue(blacklist, CFRangeMake(0, CFArrayGetCount(blacklist)), executableName))) {
-                            blacklisted = true;
-                            
-                    } else if (blacklisted &&
-                        ((identifier != NULL && CFArrayContainsValue(whitelist, CFRangeMake(0, CFArrayGetCount(whitelist)), identifier)) ||
-                         CFArrayContainsValue(whitelist, CFRangeMake(0, CFArrayGetCount(whitelist)), executableName))) {
-                            blacklisted = false;
-                   }
+                for (CFIndex i = 0; i < CFArrayGetCount(blacklist); i++) {
+                    CFTypeRef value = CFArrayGetValueAtIndex(blacklist, i);
                     
-                    CFRelease(executableName);
+                    if (CFStringGetTypeID() == CFGetTypeID(value)) {
+                        
+                        if (CFBundleGetBundleWithIdentifier(value) ||
+                            (executableName != NULL && CFEqual(value, executableName))) {
+                            blacklisted = true;
+                            break;
+                            
+                        }
+                    }
                 }
+                
+                if (blacklisted &&
+                    ((identifier != NULL && CFArrayContainsValue(whitelist, CFRangeMake(0, CFArrayGetCount(whitelist)), identifier)) ||
+                     (executableName != NULL && CFArrayContainsValue(whitelist, CFRangeMake(0, CFArrayGetCount(whitelist)), executableName)))) {
+                        blacklisted = false;
+                    }
             }
-            
             
             CFRelease(config);
         }
     }
     
-parse:
-
     // don't load shit
-    if (blacklisted) {
-        goto fin;
+    return blacklisted;
+}
+
+static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, CFStringRef executableName) {
+    if (libraries == NULL)
+        return;
+    
+    CFBundleRef folder = CFBundleCreate(kCFAllocatorDefault, libraries);
+    
+    if (folder == NULL)
+        return;
+    
+    CFArrayRef bundles = CFBundleCopyResourceURLsOfType(folder, CFSTR("bundle"), NULL);
+    CFRelease(folder);
+    
+    if (bundles == NULL) {
+        return;
     }
     
     for (CFIndex i = 0; i < CFArrayGetCount(bundles); i++) {
@@ -326,10 +323,6 @@ parse:
             if (!any)
                 shouldLoad = false;
             
-            CFStringRef executableName = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault,
-                                                                         executable,
-                                                                         kCFStringEncodingUTF8,
-                                                                         kCFAllocatorNull);
             for (CFIndex i = 0; i < CFArrayGetCount(executableFilter); i++) {
                 CFStringRef name = CFArrayGetValueAtIndex(executableFilter, i);
                 if (CFEqual(executableName, name)) {
@@ -337,8 +330,6 @@ parse:
                     break;
                 }
             }
-            
-            CFRelease(executableName);
             
             if (!any && !shouldLoad)
                 goto release;
@@ -486,54 +477,73 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     
+    CFDictionaryRef info = CFBundleGetInfoDictionary(mainBundle);
+    CFStringRef identifier = (info == NULL) ? NULL : CFDictionaryGetValue(info, kCFBundleIdentifierKey);
+    OPLog(OPLogLevelNotice, "Installing %@ [%s] (%.2f)", identifier, executable, kCFCoreFoundationVersionNumber);
+    
+    CFStringRef executableName = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault,
+                                                                 executable,
+                                                                 kCFStringEncodingUTF8,
+                                                                 kCFAllocatorNull);
+    
     // Process extensions for all users
     CFURLRef libraries = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault,
                                                                  (const UInt8 *)OPLibrariesPath,
                                                                  strlen(OPLibrariesPath),
                                                                  true);
-    if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
-        OPLog(OPLogLevelError, "Unable to access root libraries directory");
-        
-    } else if (libraries != NULL) {
-        _OpeeProcessExtensions(libraries, mainBundle, executable);
-        
-    } else {
-        return;
-        
-    }
     
     // process extensions for current user
     CFURLRef homeDirectory = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault,
                                                                      (UInt8 *)pw->pw_dir,
                                                                      strlen(pw->pw_dir),
                                                                      true);
+    
     if (homeDirectory == NULL) {
-        return;
+        goto clean;
     }
-
+    
     CFStringRef librariesPath = CFURLCopyPath(libraries);
     CFURLRef userLibraries = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault,
                                                                    homeDirectory,
                                                                    librariesPath,
                                                                    true);
     
-    CFRelease(libraries);
     CFRelease(librariesPath);
     CFRelease(homeDirectory);
     
-    if (userLibraries != NULL) {
+    bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName) ||
+                        _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
+    
+    if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
+        OPLog(OPLogLevelError, "Unable to access root libraries directory");
+        
+    } else if (libraries != NULL && !blacklisted) {
+        _OpeeProcessExtensions(libraries, mainBundle, executableName);
+    }
+    
+    if (userLibraries != NULL && !blacklisted) {
         CFBooleanRef readable;
-
+        
         if (CFURLCopyResourcePropertyForKey(userLibraries, kCFURLIsReadableKey, &readable, NULL)) {
             if (CFBooleanGetValue(readable)) {
-                _OpeeProcessExtensions(userLibraries, mainBundle, executable);
+                _OpeeProcessExtensions(userLibraries, mainBundle, executableName);
                 
             } else {
                 OPLog(OPLogLevelError, "Unable to access user libraries directory");
                 
             }
         }
-        
-        CFRelease(userLibraries);
     }
+    
+    if (blacklisted) {
+        CFLog(kCFLogLevelError, CFSTR("BLACKLISTED"));
+    }
+    
+clean:
+    if (libraries != NULL)
+        CFRelease(libraries);
+    if (userLibraries != NULL)
+        CFRelease(userLibraries);
+    CFRelease(executableName);
+
 }
