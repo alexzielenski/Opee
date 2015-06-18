@@ -535,10 +535,6 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         }
     }
     
-    if (blacklisted) {
-        CFLog(kCFLogLevelError, CFSTR("BLACKLISTED"));
-    }
-    
 clean:
     if (libraries != NULL)
         CFRelease(libraries);
