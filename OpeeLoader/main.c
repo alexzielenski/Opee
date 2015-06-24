@@ -179,6 +179,8 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
     }
     
     for (CFIndex i = 0; i < CFArrayGetCount(bundles); i++) {
+        bool shouldLoad = false;
+
         CFURLRef bundleURL = CFArrayGetValueAtIndex(bundles, i);
         CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
         if (bundle == NULL) {
@@ -192,10 +194,7 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
         
         CFDictionaryRef filters = CFDictionaryGetValue(info, kOPFiltersKey);
         
-        
-        bool shouldLoad = false;
-        
-        if (filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) {
+        if ((filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) && mainBundle != NULL) {
             // Try SIMBL?
             /*
              <key>SIMBLTargetApplications</key>
@@ -270,6 +269,9 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
             }
             
             goto release;
+        } else if (filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) {
+            goto release;
+            
         }
         
         CFArrayRef versionFilter = CFDictionaryGetValue(filters, kOPCoreFoundationVersionKey);
@@ -423,7 +425,8 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     BLACKLIST(configd);
     BLACKLIST(coreservicesd);
     BLACKLIST(opendirectoryd);
-    
+    BLACKLIST(aslmanager); // Added in 10.11b2, broke boot process
+
     /*
      These are processes which are blacklisted because they break
      some system functionality
@@ -458,9 +461,9 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         // Couldn't find safe boot flag
         return;
     }
-    
-    // dont load into root processes
+
     struct passwd *pw = getpwuid(getuid());
+    // dont load into root processes
     if (pw == NULL || pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0)
         return;
     // only load in processes run by a user with a home dir
@@ -473,7 +476,6 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         OPLog(OPLogLevelNotice, "Safe Mode Enabled. Doing nothing.");
         return;
     }
-    
     
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     
@@ -512,8 +514,8 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     CFRelease(homeDirectory);
     
     bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName) ||
-                        _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
-    
+                    _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
+
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
         OPLog(OPLogLevelError, "Unable to access root libraries directory");
         
