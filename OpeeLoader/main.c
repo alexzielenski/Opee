@@ -426,7 +426,11 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     BLACKLIST(coreservicesd);
     BLACKLIST(opendirectoryd);
     BLACKLIST(aslmanager); // Added in 10.11b2, broke boot process
-
+    BLACKLIST(securityd);
+    BLACKLIST(appleeventsd);
+    BLACKLIST(kextd);
+    BLACKLIST(mDNSResponder);
+    
     /*
      These are processes which are blacklisted because they break
      some system functionality
@@ -443,6 +447,9 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     
     // Blacklist developer tools
     BLACKLIST(git);
+    BLACKLIST(xcodebuild);
+    BLACKLIST(gcc);
+    BLACKLIST(lldb);
     BLACKLIST(svn);
     BLACKLIST(com.apple.dt.Xcode.sourcecontrol.Git);
     
