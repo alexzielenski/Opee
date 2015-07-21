@@ -32,6 +32,7 @@ CF_EXPORT CFURLRef CFCopyHomeDirectoryURLForUser(CFStringRef uName);
 
 #define OPLogLevelNotice LOG_NOTICE
 #define OPLogLevelWarning LOG_WARNING
+#define OPLogLevelKernel LOG_KERN
 #define OPLogLevelError LOG_ERR
 
 #ifdef DEBUG
@@ -78,6 +79,7 @@ static const CFStringRef kOPAnyValue                 = CFSTR("Any");
 static const CFStringRef kOPExecutablesKey           = CFSTR("Executables");
 static const CFStringRef kOPBundlesKey               = CFSTR("Bundles");
 static const CFStringRef kOPClassesKey               = CFSTR("Classes");
+static const CFStringRef kOPAllowsRootKey            = CFSTR("AllowsRoot");
 
 static BOOL _OpeeIsProcessBlacklistedInFolder(CFURLRef libraries, CFDictionaryRef info, CFStringRef executableName) {
     CFStringRef identifier;
@@ -162,7 +164,7 @@ static BOOL _OpeeIsProcessBlacklistedInFolder(CFURLRef libraries, CFDictionaryRe
     return blacklisted;
 }
 
-static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, CFStringRef executableName) {
+static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, CFStringRef executableName, BOOL root) {
     if (libraries == NULL)
         return;
     
@@ -194,7 +196,9 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
         
         CFDictionaryRef filters = CFDictionaryGetValue(info, kOPFiltersKey);
         
-        if ((filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) && mainBundle != NULL) {
+        
+        
+        if ((filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) && mainBundle != NULL && !root) {
             // Try SIMBL?
             /*
              <key>SIMBLTargetApplications</key>
@@ -272,6 +276,13 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
         } else if (filters == NULL || CFGetTypeID(filters) != CFDictionaryGetTypeID()) {
             goto release;
             
+        }
+        
+        // only load extensions which explicitly want root privileges
+        CFBooleanRef allowsRoot = CFDictionaryGetValue(filters, kOPAllowsRootKey);
+        if (((allowsRoot != NULL && CFGetTypeID(allowsRoot) == CFBooleanGetTypeID() &&
+            !CFBooleanGetValue(allowsRoot)) || allowsRoot == NULL) && root) {
+            goto release;
         }
         
         CFArrayRef versionFilter = CFDictionaryGetValue(filters, kOPCoreFoundationVersionKey);
@@ -363,9 +374,18 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
             
             for (CFIndex i = 0; i < CFArrayGetCount(classesFilter); i++) {
                 CFStringRef class = CFArrayGetValueAtIndex(classesFilter, i);
-                if (objc_getClass(CFStringGetCStringPtr(class, kCFStringEncodingUTF8)) != NULL) {
-                    shouldLoad = true;
-                    break;
+                static void *(*getClass)(const char *) = NULL;
+                static dispatch_once_t onceToken;
+                dispatch_once(&onceToken, ^{
+                    getClass = dlsym(RTLD_DEFAULT, "objc_getClass");
+
+                });
+                
+                if (getClass != NULL) {
+                    if (getClass(CFStringGetCStringPtr(class, kCFStringEncodingUTF8)) != NULL) {
+                        shouldLoad = true;
+                        break;
+                    }
                 }
             }
             
@@ -421,15 +441,39 @@ __attribute__((__constructor__)) static void _OpeeInit(){
      result in a crash at boot
      */
 #define BLACKLIST(PROCESS) if (strcmp(executable, #PROCESS) == 0) return;
+    // Break boot processes
     BLACKLIST(notifyd);
     BLACKLIST(configd);
     BLACKLIST(coreservicesd);
     BLACKLIST(opendirectoryd);
-    BLACKLIST(aslmanager); // Added in 10.11b2, broke boot process
+    BLACKLIST(bluetoothaudiod);
+    
+    BLACKLIST(autofsd);
+    BLACKLIST(amfid);
+    BLACKLIST(lsd);
+    BLACKLIST(UserEventAgent);
+    BLACKLIST(KernelEventAgent);
+    BLACKLIST(authd);
+    BLACKLIST(blued);
+    BLACKLIST(authd);
+    BLACKLIST(com.apple.ctkpcs);
+    BLACKLIST(loginwindow);
+    BLACKLIST(DumpPanic);
+    BLACKLIST(diskmanagementstartup);
+    BLACKLIST(MRT);
+    BLACKLIST(duetknowledged);
+    
+     // Added in 10.11b2, broke boot process
+    BLACKLIST(aslmanager);
     BLACKLIST(securityd);
     BLACKLIST(appleeventsd);
     BLACKLIST(kextd);
-    BLACKLIST(mDNSResponder);
+    BLACKLIST(VDCAssistant);
+    BLACKLIST(backupd);
+    BLACKLIST(backupd-helper);
+    BLACKLIST(automount);
+    BLACKLIST(kdc);
+    BLACKLIST(ocspd);
     
     /*
      These are processes which are blacklisted because they break
@@ -445,11 +489,16 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     BLACKLIST(mdworker);
     BLACKLIST(mds);
     
+    BLACKLIST(mDNSResponder);
+    BLACKLIST(useractivityd);
+    BLACKLIST(syslogd);
+    
     // Blacklist developer tools
     BLACKLIST(git);
     BLACKLIST(xcodebuild);
     BLACKLIST(gcc);
     BLACKLIST(lldb);
+    BLACKLIST(codesign);
     BLACKLIST(svn);
     BLACKLIST(com.apple.dt.Xcode.sourcecontrol.Git);
     
@@ -462,16 +511,45 @@ __attribute__((__constructor__)) static void _OpeeInit(){
             // We are in safe mode
             return;
         } else {
+    CFStringRef librariesPath = CFURLCopyPath(libraries);
+    CFURLRef userLibraries = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault,
+                                                                   homeDirectory,
+                                                                   librariesPath,
+                                                                   true);
+    
+    CFRelease(librariesPath);
+    CFRelease(homeDirectory);
+    
+    bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName) ||
+                    _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
+
             // Normal mode. Continue…
         }
     } else {
         // Couldn't find safe boot flag
         return;
     }
-
+    
+    if (userLibraries != NULL && !blacklisted) {
+        CFBooleanRef readable;
+        
+        if (CFURLCopyResourcePropertyForKey(userLibraries, kCFURLIsReadableKey, &readable, NULL)) {
+            if (CFBooleanGetValue(readable)) {
+                _OpeeProcessExtensions(userLibraries, mainBundle, executableName);
+                
+            } else {
+                OPLog(OPLogLevelError, "Unable to access user libraries directory");
+                
+            }
+        }
+    }
+    
     struct passwd *pw = getpwuid(getuid());
+    BOOL root = (pw == NULL || pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0);
     // dont load into root processes
-    if (pw == NULL || pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0)
+    if (userLibraries != NULL)
+        CFRelease(userLibraries);
+    if (root)
         return;
     // only load in processes run by a user with a home dir
     else if (pw->pw_dir == NULL || strlen(pw->pw_dir) == 0)
@@ -480,15 +558,18 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     if (access(OPSafePath, R_OK) != -1 ||
         access(OPSafePath2, R_OK) != -1) {
         // The Safe Mode file exists, don't do anything
-        OPLog(OPLogLevelNotice, "Safe Mode Enabled. Doing nothing.");
+        OPLog(OPLogLevelKernel, "Safe Mode Enabled. Doing nothing.");
         return;
     }
     
-    CFBundleRef mainBundle = CFBundleGetMainBundle();
     
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFDictionaryRef info = CFBundleGetInfoDictionary(mainBundle);
+    
+#ifdef DEBUG
     CFStringRef identifier = (info == NULL) ? NULL : CFDictionaryGetValue(info, kCFBundleIdentifierKey);
     OPLog(OPLogLevelNotice, "Installing %@ [%s] (%.2f)", identifier, executable, kCFCoreFoundationVersionNumber);
+#endif
     
     CFStringRef executableName = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault,
                                                                  executable,
@@ -511,44 +592,16 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         goto clean;
     }
     
-    CFStringRef librariesPath = CFURLCopyPath(libraries);
-    CFURLRef userLibraries = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault,
-                                                                   homeDirectory,
-                                                                   librariesPath,
-                                                                   true);
-    
-    CFRelease(librariesPath);
-    CFRelease(homeDirectory);
-    
-    bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName) ||
-                    _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
-
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
         OPLog(OPLogLevelError, "Unable to access root libraries directory");
         
     } else if (libraries != NULL && !blacklisted) {
         _OpeeProcessExtensions(libraries, mainBundle, executableName);
     }
-    
-    if (userLibraries != NULL && !blacklisted) {
-        CFBooleanRef readable;
-        
-        if (CFURLCopyResourcePropertyForKey(userLibraries, kCFURLIsReadableKey, &readable, NULL)) {
-            if (CFBooleanGetValue(readable)) {
-                _OpeeProcessExtensions(userLibraries, mainBundle, executableName);
-                
-            } else {
-                OPLog(OPLogLevelError, "Unable to access user libraries directory");
-                
-            }
-        }
-    }
-    
+
 clean:
     if (libraries != NULL)
         CFRelease(libraries);
-    if (userLibraries != NULL)
-        CFRelease(userLibraries);
     CFRelease(executableName);
 
 }

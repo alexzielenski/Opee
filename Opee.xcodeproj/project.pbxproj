@@ -15,7 +15,6 @@
 		FA754CBA19822E84006AA1D9 /* ZKSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = FA754CAF19822E84006AA1D9 /* ZKSwizzle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA754CBB19822E84006AA1D9 /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FA754CB019822E84006AA1D9 /* ZKSwizzle.m */; };
 		FAC892461AC05EB7004B9E82 /* optool in Resources */ = {isa = PBXBuildFile; fileRef = FAC892411AC05E58004B9E82 /* optool */; };
-		FAD89F881A9A714A00BC98C6 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD89F871A9A714A00BC98C6 /* libobjc.dylib */; };
 		FADB09AD197CA0B800D804D0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */; };
 		FADC231219805366008330B7 /* OPHooker.c in Sources */ = {isa = PBXBuildFile; fileRef = FADC231019805366008330B7 /* OPHooker.c */; };
 		FADC231319805366008330B7 /* OPHooker.h in Headers */ = {isa = PBXBuildFile; fileRef = FADC231119805366008330B7 /* OPHooker.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -58,7 +57,6 @@
 		FA754CAF19822E84006AA1D9 /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = ZKSwizzle/ZKSwizzle.h; sourceTree = "<group>"; };
 		FA754CB019822E84006AA1D9 /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = ZKSwizzle/ZKSwizzle.m; sourceTree = "<group>"; };
 		FAC8923B1AC05E58004B9E82 /* optool.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = optool.xcodeproj; path = optool/optool.xcodeproj; sourceTree = "<group>"; };
-		FAD89F871A9A714A00BC98C6 /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
 		FADB0990197C8EF300D804D0 /* OpeeLoader.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = OpeeLoader.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		FADC231019805366008330B7 /* OPHooker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OPHooker.c; sourceTree = "<group>"; };
@@ -86,7 +84,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAD89F881A9A714A00BC98C6 /* libobjc.dylib in Frameworks */,
 				FADB09AD197CA0B800D804D0 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,7 +157,6 @@
 		FADB0987197C8EF300D804D0 = {
 			isa = PBXGroup;
 			children = (
-				FAD89F871A9A714A00BC98C6 /* libobjc.dylib */,
 				FA44F3F0197F6DFF00435610 /* libArgumentParser-Static.a */,
 				FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */,
 				FA44F1F7197EFAA100435610 /* Opee */,
