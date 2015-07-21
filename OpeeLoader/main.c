@@ -511,44 +511,16 @@ __attribute__((__constructor__)) static void _OpeeInit(){
             // We are in safe mode
             return;
         } else {
-    CFStringRef librariesPath = CFURLCopyPath(libraries);
-    CFURLRef userLibraries = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault,
-                                                                   homeDirectory,
-                                                                   librariesPath,
-                                                                   true);
-    
-    CFRelease(librariesPath);
-    CFRelease(homeDirectory);
-    
-    bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName) ||
-                    _OpeeIsProcessBlacklistedInFolder(userLibraries, info, executableName);
-
             // Normal mode. Continue…
         }
     } else {
         // Couldn't find safe boot flag
         return;
     }
-    
-    if (userLibraries != NULL && !blacklisted) {
-        CFBooleanRef readable;
-        
-        if (CFURLCopyResourcePropertyForKey(userLibraries, kCFURLIsReadableKey, &readable, NULL)) {
-            if (CFBooleanGetValue(readable)) {
-                _OpeeProcessExtensions(userLibraries, mainBundle, executableName);
-                
-            } else {
-                OPLog(OPLogLevelError, "Unable to access user libraries directory");
-                
-            }
-        }
-    }
-    
+
     struct passwd *pw = getpwuid(getuid());
     BOOL root = (pw == NULL || pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0);
     // dont load into root processes
-    if (userLibraries != NULL)
-        CFRelease(userLibraries);
     if (root)
         return;
     // only load in processes run by a user with a home dir
@@ -582,21 +554,13 @@ __attribute__((__constructor__)) static void _OpeeInit(){
                                                                  strlen(OPLibrariesPath),
                                                                  true);
     
-    // process extensions for current user
-    CFURLRef homeDirectory = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault,
-                                                                     (UInt8 *)pw->pw_dir,
-                                                                     strlen(pw->pw_dir),
-                                                                     true);
-    
-    if (homeDirectory == NULL) {
-        goto clean;
-    }
+    bool blacklisted = _OpeeIsProcessBlacklistedInFolder(libraries, info, executableName);
     
     if (access(OPLibrariesPath, X_OK | R_OK) == -1) {
         OPLog(OPLogLevelError, "Unable to access root libraries directory");
         
     } else if (libraries != NULL && !blacklisted) {
-        _OpeeProcessExtensions(libraries, mainBundle, executableName);
+        _OpeeProcessExtensions(libraries, mainBundle, executableName, root);
     }
 
 clean:
