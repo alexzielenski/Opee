@@ -72,9 +72,9 @@ OpeeLoader is a dyamic library that gets loaded into all processes that link Fou
 
 # Information
 
-Place your extensions in `/Library/Opee/Extensions` or `~/Library/Opee/Extensions` to have them automatically loaded into processes depending upon thier filters.
+Place your extensions in `/Library/Opee/Extensions` to have them automatically loaded into processes depending upon thier filters.
 
-You can choose to blacklist executables by placing a file called `OPConfig.plist` in either directory and specifying in an array called `Blacklist` the executable names or bundle identifiers which you'd like to blacklist.
+You can choose to blacklist executables by placing a file called `OPConfig.plist` `/Library/Opee/Extensions` and specifying in an array called `Blacklist` the executable names or bundle identifiers which you'd like to blacklist.
 
 Apps can choose to blacklist themselves by adding an `OPBlacklisted` key inside their `Info.plist` set to true. You can override this setting by adding their bundle identifier in your `OPConfig.plist` in the `Whitelist` array to have your extensions loaded into them anyway.
 
