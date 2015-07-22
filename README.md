@@ -78,6 +78,22 @@ You can choose to blacklist executables by placing a file called `OPConfig.plist
 
 Apps can choose to blacklist themselves by adding an `OPBlacklisted` key inside their `Info.plist` set to true. You can override this setting by adding their bundle identifier in your `OPConfig.plist` in the `Whitelist` array to have your extensions loaded into them anyway.
 
+## Will Opee slow down my computer?
+
+Yes.
+
+## Wait what? Will I notice it?
+
+Probably not.
+
+## Should I install this?
+
+No. Unless you know what you're doing. You must be THIS tall to ride.
+
+## How does this work?
+
+It binary patches the second-most essential file on your system to force things to load a third party library and could very well prevent you from booting if you don't know what you're doing. If this happens to you, follow the above instructions.
+
 # Usage
 
 Developers can easily make an extension by creating a new `Bundle` project in Xcode. Extensions can hook method and function calls either by their own way or by linking `Opee.framework` which includes functions and macros that are very useful for this purpose.
