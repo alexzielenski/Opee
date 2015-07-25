@@ -411,7 +411,7 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
         if (handle == NULL) {
             OPLog(OPLogLevelError, "%s", dlerror());
         }
-        
+    
         CFRelease(bundle);
     }
     
@@ -421,60 +421,36 @@ fin:
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
 // same expected functionality of the filtering
-__attribute__((__constructor__)) static void _OpeeInit(){
+__attribute__((__constructor__)) static void _OpeeInit(int argc, char **argv, char **envp){
     if (dlopen("/System/Library/Frameworks/Security.framework/Security", RTLD_LAZY | RTLD_NOLOAD) == NULL)
         return;
+    
+    if (argc < 1 || argv == NULL || getuid() == 0)
+        return;
+    
+    // Don't load in safe mode:
+    int safeBoot;
+    int mib_name[2] = { CTL_KERN, KERN_SAFEBOOT };
+    size_t length = sizeof(safeBoot);
+    if (!sysctl(mib_name, 2, &safeBoot, &length, NULL, 0)) {
+        if (safeBoot == 1) {
+            // We are in safe mode
+            return;
+        } else {
+            // Normal mode. Continue…
+        }
+    } else {
+        // Couldn't find safe boot flag
+        return;
+    }
     
     // The first argument is the spawned process
     // Get the process name by looking at the last path
     // component.
-    char argv[MAXPATHLEN];
-    unsigned int buffSize = MAXPATHLEN;
-    _NSGetExecutablePath(argv, &buffSize);
+    char *executable = strrchr(argv[0], '/');
+    executable = (executable == NULL) ? argv[0] : executable + 1;
     
-    char *executable = strrchr(argv, '/');
-    executable = (executable == NULL) ? argv : executable + 1;
-    
-    /* Blacklisted Process Names
-     These are blacklisted because they are
-     used internally by the logic below which would
-     result in a crash at boot
-     */
 #define BLACKLIST(PROCESS) if (strcmp(executable, #PROCESS) == 0) return;
-    // Break boot processes
-    BLACKLIST(notifyd);
-    BLACKLIST(configd);
-    BLACKLIST(coreservicesd);
-    BLACKLIST(opendirectoryd);
-    BLACKLIST(bluetoothaudiod);
-    
-    BLACKLIST(autofsd);
-    BLACKLIST(amfid);
-    BLACKLIST(lsd);
-    BLACKLIST(UserEventAgent);
-    BLACKLIST(KernelEventAgent);
-    BLACKLIST(authd);
-    BLACKLIST(blued);
-    BLACKLIST(authd);
-    BLACKLIST(com.apple.ctkpcs);
-    BLACKLIST(loginwindow);
-    BLACKLIST(DumpPanic);
-    BLACKLIST(diskmanagementstartup);
-    BLACKLIST(MRT);
-    BLACKLIST(duetknowledged);
-    
-     // Added in 10.11b2, broke boot process
-    BLACKLIST(aslmanager);
-    BLACKLIST(securityd);
-    BLACKLIST(appleeventsd);
-    BLACKLIST(kextd);
-    BLACKLIST(VDCAssistant);
-    BLACKLIST(backupd);
-    BLACKLIST(backupd-helper);
-    BLACKLIST(automount);
-    BLACKLIST(kdc);
-    BLACKLIST(ocspd);
-    
     /*
      These are processes which are blacklisted because they break
      some system functionality
@@ -501,30 +477,10 @@ __attribute__((__constructor__)) static void _OpeeInit(){
     BLACKLIST(codesign);
     BLACKLIST(svn);
     BLACKLIST(com.apple.dt.Xcode.sourcecontrol.Git);
-    
-    // Don't load in safe mode:
-    int safeBoot;
-    int mib_name[2] = { CTL_KERN, KERN_SAFEBOOT };
-    size_t length = sizeof(safeBoot);
-    if (!sysctl(mib_name, 2, &safeBoot, &length, NULL, 0)) {
-        if (safeBoot == 1) {
-            // We are in safe mode
-            return;
-        } else {
-            // Normal mode. Continue…
-        }
-    } else {
-        // Couldn't find safe boot flag
-        return;
-    }
 
     struct passwd *pw = getpwuid(getuid());
-    BOOL root = (pw == NULL || pw->pw_name == NULL || strcmp(pw->pw_name, "root") == 0);
-    // dont load into root processes
-    if (root)
-        return;
     // only load in processes run by a user with a home dir
-    else if (pw->pw_dir == NULL || strlen(pw->pw_dir) == 0)
+    if (pw->pw_dir == NULL || strlen(pw->pw_dir) == 0)
         return;
     
     if (access(OPSafePath, R_OK) != -1 ||
@@ -560,12 +516,12 @@ __attribute__((__constructor__)) static void _OpeeInit(){
         OPLog(OPLogLevelError, "Unable to access root libraries directory");
         
     } else if (libraries != NULL && !blacklisted) {
-        _OpeeProcessExtensions(libraries, mainBundle, executableName, root);
+        _OpeeProcessExtensions(libraries, mainBundle, executableName, NO);
     }
-
-clean:
+    
+    CFRelease(executableName);
+    
     if (libraries != NULL)
         CFRelease(libraries);
-    CFRelease(executableName);
 
 }
