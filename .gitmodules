@@ -1,6 +1,6 @@
 [submodule "Opee/ZKSwizzle"]
 	path = Opee/ZKSwizzle
-	url = git@github.com:alexzielenski/ZKSwizzle.git
+	url = https://github.com/alexzielenski/ZKSwizzle.git
 [submodule "optool"]
 	path = optool
 	url = git@github.com:alexzielenski/optool.git
