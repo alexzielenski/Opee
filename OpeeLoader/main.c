@@ -156,7 +156,8 @@ static BOOL _OpeeIsProcessBlacklistedInFolder(CFURLRef libraries, CFDictionaryRe
                     }
             }
             
-            CFRelease(config);
+            if (config != NULL)
+                CFRelease(config);
         }
     }
     
@@ -395,28 +396,34 @@ static void _OpeeProcessExtensions(CFURLRef libraries, CFBundleRef mainBundle, C
         
     release:
         // move on to the next dylib if filters don't match
-        if (!shouldLoad) {
-            CFRelease(bundle);
+        if (!shouldLoad || bundle == NULL) {
+            if (bundle != NULL)
+                CFRelease(bundle);
             continue;
         }
         
-        // CFBundleLoad doesn't use the correct dlopen flags
-        CFURLRef executableURL = CFBundleCopyExecutableURL(bundle);
-        const char executablePath[PATH_MAX];
-        CFURLGetFileSystemRepresentation(executableURL, true, (UInt8*)&executablePath, PATH_MAX);
-        CFRelease(executableURL);
-        
-        // load the dylib
-        void *handle = dlopen(executablePath, RTLD_LAZY | RTLD_GLOBAL);
-        if (handle == NULL) {
-            OPLog(OPLogLevelError, "%s", dlerror());
-        }
+        if (bundle != NULL) {
+            // CFBundleLoad doesn't use the correct dlopen flags
+            CFURLRef executableURL = CFBundleCopyExecutableURL(bundle);
+            if (executableURL != NULL) {
+                const char executablePath[PATH_MAX];
+                CFURLGetFileSystemRepresentation(executableURL, true, (UInt8*)&executablePath, PATH_MAX);
+                CFRelease(executableURL);
+                
+                // load the dylib
+                void *handle = dlopen(executablePath, RTLD_LAZY | RTLD_GLOBAL);
+                if (handle == NULL) {
+                    OPLog(OPLogLevelError, "%s", dlerror());
+                }
+            }
     
-        CFRelease(bundle);
+            CFRelease(bundle);
+        }
     }
     
 fin:
-    CFRelease(bundles);
+    if (bundles != NULL)
+        CFRelease(bundles);
 }
 
 // pretty much all of this we borrowed from MobileSubstrate to get the
@@ -519,7 +526,8 @@ __attribute__((__constructor__)) static void _OpeeInit(int argc, char **argv, ch
         _OpeeProcessExtensions(libraries, mainBundle, executableName, NO);
     }
     
-    CFRelease(executableName);
+    if (executable != NULL)
+        CFRelease(executableName);
     
     if (libraries != NULL)
         CFRelease(libraries);
