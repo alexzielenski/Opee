@@ -15,6 +15,7 @@
 		FA754CBA19822E84006AA1D9 /* ZKSwizzle.h in Headers */ = {isa = PBXBuildFile; fileRef = FA754CAF19822E84006AA1D9 /* ZKSwizzle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA754CBB19822E84006AA1D9 /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FA754CB019822E84006AA1D9 /* ZKSwizzle.m */; };
 		FAC892461AC05EB7004B9E82 /* optool in Resources */ = {isa = PBXBuildFile; fileRef = FAC892411AC05E58004B9E82 /* optool */; };
+		FAD972321B68210900BB95A5 /* OpeeLoader.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = FADB0990197C8EF300D804D0 /* OpeeLoader.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		FADB09AD197CA0B800D804D0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADB09AC197CA0B800D804D0 /* CoreFoundation.framework */; };
 		FADC231219805366008330B7 /* OPHooker.c in Sources */ = {isa = PBXBuildFile; fileRef = FADC231019805366008330B7 /* OPHooker.c */; };
 		FADC231319805366008330B7 /* OPHooker.h in Headers */ = {isa = PBXBuildFile; fileRef = FADC231119805366008330B7 /* OPHooker.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -43,6 +44,20 @@
 			remoteInfo = optool;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FAD972311B6820F700BB95A5 /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Libraries;
+			dstSubfolderSpec = 1;
+			files = (
+				FAD972321B68210900BB95A5 /* OpeeLoader.dylib in Copy Files */,
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		FA2B90571B29472E00116387 /* SubstituteHooker.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = SubstituteHooker.a; path = Hookers/SubstituteHooker.a; sourceTree = "<group>"; };
@@ -209,6 +224,7 @@
 				FA44F1F3197EFAA100435610 /* Headers */,
 				FA44F1F4197EFAA100435610 /* Resources */,
 				FADC231D19805771008330B7 /* ShellScript */,
+				FAD972311B6820F700BB95A5 /* Copy Files */,
 			);
 			buildRules = (
 			);
