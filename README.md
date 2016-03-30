@@ -15,13 +15,7 @@ You can find them [here](https://developer.apple.com/downloads/index.action#). O
 
 #### Procedure
 
-***Note*** If you are using El Capitan, you must run these commands before starting installation:
-
-```
-sudo nvram boot-args="rootless=0"
-sudo reboot
-```
-You can re-enable rootless after installation by replacing the `0` with a `1`.
+***Note*** If you are using El Capitan, you must disable SIP before installing Opee. You can re-enable it afterwards.
 
 1. Copy OpeeLoader.dylib to `/usr/lib`
 2. Copy Opee.framework to `/Library/Frameworks`
