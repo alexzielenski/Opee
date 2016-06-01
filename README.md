@@ -1,3 +1,7 @@
+## Opee Is Discontinued
+
+Try [Parasite](https://github.com/ParasiteTeam)
+
 # Opee
 
 Opee is a platform which enables the ability to load dynamic libraries (dylibs) on Mac OS X into processes and override functionality.
